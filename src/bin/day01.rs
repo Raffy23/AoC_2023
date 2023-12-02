@@ -1,5 +1,10 @@
 use std::fs::read_to_string;
 
+fn main() {
+    println!("Day 01 Part 1: {}", solve1());
+    println!("Day 01 Part 2: {}", solve2());
+}
+
 pub fn solve1() -> u32 {
     read_to_string("./input/day01_01.txt")
         .unwrap()
