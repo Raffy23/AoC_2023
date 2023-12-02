@@ -23,24 +23,24 @@ pub fn solve1(input: Lines) -> u32 {
         .sum()
 }
 
+const NUMBERS: [(&'static str, u32); 9] = [
+    ("one", 1),
+    ("two", 2),
+    ("three", 3),
+    ("four", 4),
+    ("five", 5),
+    ("six", 6),
+    ("seven", 7),
+    ("eight", 8),
+    ("nine", 9),
+];
+
 pub fn solve2(input: Lines) -> u32 {
     input
         .map(|line| {
-            let mut out: String = line.into();
+            let mut out: &str = line.into();
             let mut first: Option<u32> = None;
             let mut last: Option<u32> = None;
-
-            let r = vec![
-                ("one", 1),
-                ("two", 2),
-                ("three", 3),
-                ("four", 4),
-                ("five", 5),
-                ("six", 6),
-                ("seven", 7),
-                ("eight", 8),
-                ("nine", 9),
-            ];
 
             while first.is_none() {
                 let first_char = out.chars().next().unwrap();
@@ -50,14 +50,14 @@ pub fn solve2(input: Lines) -> u32 {
                     break;
                 }
 
-                for (needle, value) in r.iter() {
+                for (needle, value) in NUMBERS.iter() {
                     if out.starts_with(needle) {
-                        first = Some(*value);
+                        first = Some(value.clone());
                         break;
                     }
                 }
 
-                out = out.get(1..).unwrap().into();
+                out = &out[1..];
             }
 
             while last.is_none() {
@@ -68,14 +68,14 @@ pub fn solve2(input: Lines) -> u32 {
                     break;
                 }
 
-                for (needle, value) in r.iter() {
+                for (needle, value) in NUMBERS.iter() {
                     if out.ends_with(needle) {
-                        last = Some(*value);
+                        last = Some(value.clone());
                         break;
                     }
                 }
 
-                out = out.get(0..out.len() - 1).unwrap().into();
+                out = &out[0..out.len() - 1];
             }
 
             first.unwrap() * 10 + last.unwrap()
@@ -90,8 +90,7 @@ pub fn parse_input(input: &str) -> Lines {
 
 #[cfg(test)]
 mod tests {
-    use crate::day01::{solve1, parse_input, solve2};
-
+    use crate::day01::{parse_input, solve1, solve2};
 
     const EXAMPLE_INPUT_1: &'static str = r#"1abc2
 pqr3stu8vwx
