@@ -1,14 +1,7 @@
-use std::fs::read_to_string;
+use std::str::Lines;
 
-fn main() {
-    println!("Day 01 Part 1: {}", solve1());
-    println!("Day 01 Part 2: {}", solve2());
-}
-
-pub fn solve1() -> u32 {
-    read_to_string("./input/day01_01.txt")
-        .unwrap()
-        .lines()
+pub fn solve1(input: Lines) -> u32 {
+    input
         .map(|line| {
             let first = line
                 .chars()
@@ -30,10 +23,8 @@ pub fn solve1() -> u32 {
         .sum()
 }
 
-pub fn solve2() -> u32 {
-    read_to_string("./input/day01_01.txt")
-        .unwrap()
-        .lines()
+pub fn solve2(input: Lines) -> u32 {
+    input
         .map(|line| {
             let mut out: String = line.into();
             let mut first: Option<u32> = None;
@@ -90,4 +81,40 @@ pub fn solve2() -> u32 {
             first.unwrap() * 10 + last.unwrap()
         })
         .sum()
+}
+
+#[inline(always)]
+pub fn parse_input(input: &str) -> Lines {
+    input.lines()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::day01::{solve1, parse_input, solve2};
+
+
+    const EXAMPLE_INPUT_1: &'static str = r#"1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet
+"#;
+
+    const EXAMPLE_INPUT_2: &'static str = r#"two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+"#;
+
+    #[test]
+    fn part1() {
+        assert_eq!(solve1(parse_input(EXAMPLE_INPUT_1)), 142)
+    }
+
+    #[test]
+    fn part2() {
+        assert_eq!(solve2(parse_input(EXAMPLE_INPUT_2)), 281)
+    }
 }
