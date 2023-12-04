@@ -1,7 +1,13 @@
-use aoc_2023::{day01, day02, day03, utils::read_input, utils::Part::Part1};
+use aoc_2023::{day01, day02, day03, day04, utils::read_input, utils::Part::Part1};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-criterion_group!(benches, day01_benchmark, day02_benchmark, day03_benchmark);
+criterion_group!(
+    benches,
+    day01_benchmark,
+    day02_benchmark,
+    day03_benchmark,
+    day04_benchmark
+);
 criterion_main!(benches);
 
 fn day01_benchmark(c: &mut Criterion) {
@@ -49,5 +55,21 @@ fn day03_benchmark(c: &mut Criterion) {
 
     c.bench_function("Day03 Part2", |b| {
         b.iter(|| day03::solve2(day03::parse_input(black_box(&input))))
+    });
+}
+
+fn day04_benchmark(c: &mut Criterion) {
+    let input = read_input(4, Part1).expect("Unable to read input file!");
+
+    c.bench_function("Day04 input parsing", |b| {
+        b.iter(|| day04::parse_input(black_box(&input)))
+    });
+
+    c.bench_function("Day04 Part1", |b| {
+        b.iter(|| day04::solve1(day04::parse_input(black_box(&input)).unwrap().1))
+    });
+
+    c.bench_function("Day04 Part2", |b| {
+        b.iter(|| day04::solve2(day04::parse_input(black_box(&input)).unwrap().1))
     });
 }

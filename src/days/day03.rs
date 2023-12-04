@@ -103,6 +103,7 @@ fn scan_number(input: &[Vec<u8>], source: Point) -> (usize, usize, u32) {
     )
 }
 
+#[cfg(test)]
 mod tests {
     use crate::day03::{parse_input, solve1, solve2};
 

@@ -1,4 +1,13 @@
-use std::{io, fs::read_to_string};
+use std::{fs::read_to_string, io};
+
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::digit1,
+    combinator::{map_res, recognize},
+    sequence::preceded,
+    IResult, Parser,
+};
 
 const INPUT_FOLDER: &'static str = "./input";
 
@@ -25,4 +34,19 @@ pub fn read_input(day: u8, part: Part) -> io::Result<String> {
         day,
         part.extension()
     ))
+}
+
+pub fn parse_u32(input: &str) -> IResult<&str, u32> {
+    map_res(recognize(digit1), str::parse)(input)
+}
+
+pub fn parse_aligned_u32(input: &str) -> IResult<&str, u32> {
+    map_res(
+        alt((
+            digit1,
+            preceded(tag(" "), digit1),
+            preceded(tag("  "), digit1),
+        )),
+        str::parse,
+    )(input)
 }

@@ -8,6 +8,8 @@ use nom::{
     IResult,
 };
 
+use crate::utils::parse_u32;
+
 pub type Red = u32;
 pub type Green = u32;
 pub type Blue = u32;
@@ -56,10 +58,6 @@ pub fn solve2(games: Games) -> u32 {
         })
         .map(|colors| colors.0 * colors.1 * colors.2)
         .sum()
-}
-
-fn parse_u32(input: &str) -> IResult<&str, u32> {
-    map_res(recognize(digit1), str::parse)(input)
 }
 
 fn parse_color(input: &str) -> IResult<&str, (u32, u32, u32)> {
