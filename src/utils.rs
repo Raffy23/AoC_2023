@@ -6,7 +6,7 @@ use nom::{
     character::complete::digit1,
     combinator::{map_res, recognize},
     sequence::preceded,
-    IResult, Parser,
+    IResult,
 };
 
 const INPUT_FOLDER: &'static str = "./input";

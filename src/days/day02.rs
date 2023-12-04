@@ -1,11 +1,6 @@
 use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    character::{complete::newline, streaming::digit1},
-    combinator::{map_res, recognize},
-    multi::separated_list1,
-    sequence::preceded,
-    IResult,
+    branch::alt, bytes::complete::tag, character::complete::newline, combinator::map_res,
+    multi::separated_list1, sequence::preceded, IResult,
 };
 
 use crate::utils::parse_u32;
@@ -23,7 +18,6 @@ pub type Round = Vec<Hand>;
 pub struct Game(pub u32, pub Round);
 
 pub type Games = Vec<Game>;
-
 
 pub fn solve1(games: Games) -> u32 {
     let max_red: u32 = 12;
@@ -114,7 +108,7 @@ pub fn parse_input(input: &str) -> IResult<&str, Vec<Game>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::day02::{parse_input, Hand, Game, solve1, solve2};
+    use crate::day02::{parse_input, solve1, solve2, Game, Hand};
 
     const EXAMPLE_INPUT: &'static str = r#"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
 Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
