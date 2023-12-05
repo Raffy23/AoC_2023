@@ -36,7 +36,11 @@ pub fn read_input(day: u8, part: Part) -> io::Result<String> {
     ))
 }
 
-pub fn parse_u32(input: &str) -> IResult<&str, u32> {
+pub fn parse_u32<'a>(input: &'a str) -> IResult<&'a str, u32> {
+    map_res(recognize(digit1), str::parse)(input)
+}
+
+pub fn parse_u64<'a>(input: &'a str) -> IResult<&'a str, u64> {
     map_res(recognize(digit1), str::parse)(input)
 }
 
