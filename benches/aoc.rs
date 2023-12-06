@@ -1,4 +1,4 @@
-use aoc_2023::{day01, day02, day03, day04, utils::read_input, utils::Part::Part1, day05};
+use aoc_2023::{day01, day02, day03, day04, utils::read_input, utils::Part::Part1, day05, day06};
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 criterion_group!(
@@ -7,7 +7,8 @@ criterion_group!(
     day02_benchmark,
     day03_benchmark,
     day04_benchmark,
-    day05_benchmark
+    day05_benchmark,
+    day06_benchmark
 );
 criterion_main!(benches);
 
@@ -88,5 +89,21 @@ fn day05_benchmark(c: &mut Criterion) {
 
     c.bench_function("Day05 Part2", |b| {
         b.iter(|| day05::solve2(day05::parse_input(black_box(&input)).unwrap().1))
+    });
+}
+
+fn day06_benchmark(c: &mut Criterion) {
+    let input = read_input(6, Part1).expect("Unable to read input file!");
+
+    c.bench_function("Day06 input parsing", |b| {
+        b.iter(|| day06::parse_input(black_box(&input)))
+    });
+
+    c.bench_function("Day06 Part1", |b| {
+        b.iter(|| day06::solve1(day06::parse_input(black_box(&input)).unwrap().1))
+    });
+
+    c.bench_function("Day06 Part2", |b| {
+        b.iter(|| day06::solve2(day06::parse_input(black_box(&input)).unwrap().1))
     });
 }

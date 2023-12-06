@@ -1,9 +1,7 @@
 use std::{fs::read_to_string, io};
 
 use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    character::complete::digit1,
+    character::complete::{digit1, multispace0},
     combinator::{map_res, recognize},
     sequence::preceded,
     IResult,
@@ -45,12 +43,5 @@ pub fn parse_u64<'a>(input: &'a str) -> IResult<&'a str, u64> {
 }
 
 pub fn parse_aligned_u32(input: &str) -> IResult<&str, u32> {
-    map_res(
-        alt((
-            digit1,
-            preceded(tag(" "), digit1),
-            preceded(tag("  "), digit1),
-        )),
-        str::parse,
-    )(input)
+    map_res(preceded(multispace0, digit1), str::parse)(input)
 }
