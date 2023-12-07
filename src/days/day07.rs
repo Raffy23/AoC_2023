@@ -1,13 +1,7 @@
 use std::cmp::Ordering;
 
 use itertools::Itertools;
-use nom::{
-    bytes::complete::tag,
-    character::complete::{alphanumeric1, newline},
-    multi::separated_list1,
-    sequence::{separated_pair, terminated},
-    IResult,
-};
+use winnow::{PResult, combinator::{terminated, separated, separated_pair}, ascii::{newline, alphanumeric1}, Parser};
 
 use crate::utils::parse_u32;
 
@@ -166,13 +160,14 @@ impl HandType {
     }
 }
 
-pub fn parse_input(input: &str) -> IResult<&str, Vec<(&str, u32)>> {
+pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Vec<(&'s str, u32)>> {
     terminated(
-        separated_list1(newline, separated_pair(alphanumeric1, tag(" "), parse_u32)),
+        separated(0.., separated_pair(alphanumeric1, ' ', parse_u32), newline),
         newline,
-    )(input)
+    ).parse_next(input)
 }
 
+#[allow(const_item_mutation)]
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -189,23 +184,23 @@ QQQJA 483
 
     #[test]
     fn part1() {
-        assert_eq!(solve1(parse_input(EXAMPLE_INPUT).unwrap().1), 6440)
+        assert_eq!(solve1(parse_input(&mut EXAMPLE_INPUT).unwrap()), 6440)
     }
 
     #[test]
     fn solve_part1() {
         let input = read_input(7, Part::Part1).expect("unable to read input file");
-        println!("{}", solve1(parse_input(&input).unwrap().1))
+        println!("{}", solve1(parse_input(&mut input.as_str()).unwrap()))
     }
 
     #[test]
     fn part2() {
-        assert_eq!(solve2(parse_input(EXAMPLE_INPUT).unwrap().1), 5905)
+        assert_eq!(solve2(parse_input(&mut EXAMPLE_INPUT).unwrap()), 5905)
     }
 
     #[test]
     fn solve_part2() {
         let input = read_input(7, Part::Part1).expect("unable to read input file");
-        println!("{}", solve2(parse_input(&input).unwrap().1))
+        println!("{}", solve2(parse_input(&mut input.as_str()).unwrap()))
     }
 }

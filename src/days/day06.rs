@@ -1,10 +1,9 @@
 use itertools::Itertools;
-use nom::{
-    bytes::complete::tag,
-    character::complete::{multispace1, newline},
-    multi::separated_list1,
-    sequence::terminated,
-    IResult,
+use winnow::{
+    ascii::{multispace1, space1},
+    combinator::{opt, terminated},
+    token::tag,
+    PResult, Parser,
 };
 
 use crate::utils::parse_u64;
@@ -25,11 +24,11 @@ pub fn solve1(Input(times, distances): Input) -> u64 {
 pub fn solve2(Input(times, distances): Input) -> u64 {
     let numbers_to_number = move |numbers: Vec<u64>| {
         numbers
-        .into_iter()
-        .map(|num| num.to_string())
-        .join("")
-        .parse::<u64>()
-        .unwrap()
+            .into_iter()
+            .map(|num| num.to_string())
+            .join("")
+            .parse::<u64>()
+            .unwrap()
     };
 
     let time = numbers_to_number(times);
@@ -65,17 +64,27 @@ fn solve_limits(time: u64, distance: u64) -> (u64, u64) {
     (x1, x2)
 }
 
-pub fn parse_input(input: &str) -> IResult<&str, Input> {
-    let (input, _) = tag("Time: ")(input)?;
-    let (input, _) = multispace1(input)?;
-    let (input, times) = terminated(separated_list1(multispace1, parse_u64), newline)(input)?;
-    let (input, _) = tag("Distance: ")(input)?;
-    let (input, _) = multispace1(input)?;
-    let (input, distances) = terminated(separated_list1(multispace1, parse_u64), newline)(input)?;
+pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Input> {
+    let _ = tag("Time: ").parse_next(input)?;
+    let _ = space1(input)?;
 
-    Ok((input, Input(times, distances)))
+    let mut times: Vec<u64> = Vec::with_capacity(4);
+    while let Some(value) = opt(terminated(parse_u64, multispace1)).parse_next(input)? {
+        times.push(value);
+    }
+
+    let _ = tag("Distance: ").parse_next(input)?;
+    let _ = space1(input)?;
+
+    let mut distances: Vec<u64> = Vec::with_capacity(4);
+    while let Some(value) = opt(terminated(parse_u64, multispace1)).parse_next(input)? {
+        distances.push(value);
+    }
+
+    Ok(Input(times, distances))
 }
 
+#[allow(const_item_mutation)]
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -89,23 +98,23 @@ Distance:  9  40  200
 
     #[test]
     fn part1() {
-        assert_eq!(solve1(parse_input(EXAMPLE_INPUT).unwrap().1), 288)
+        assert_eq!(solve1(parse_input(&mut EXAMPLE_INPUT).unwrap()), 288)
     }
 
     #[test]
     fn solve_part1() {
         let input = read_input(6, Part::Part1).expect("unable to read input file");
-        println!("{}", solve1(parse_input(&input).unwrap().1))
+        println!("{}", solve1(parse_input(&mut input.as_str()).unwrap()))
     }
 
     #[test]
     fn part2() {
-        assert_eq!(solve2(parse_input(EXAMPLE_INPUT).unwrap().1), 71503)
+        assert_eq!(solve2(parse_input(&mut EXAMPLE_INPUT).unwrap()), 71503)
     }
 
     #[test]
     fn solve_part2() {
         let input = read_input(6, Part::Part1).expect("unable to read input file");
-        println!("{}", solve2(parse_input(&input).unwrap().1))
+        println!("{}", solve2(parse_input(&mut input.as_str()).unwrap()))
     }
 }

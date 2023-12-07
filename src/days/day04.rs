@@ -1,8 +1,13 @@
 use std::collections::BTreeSet;
 
-use nom::{bytes::complete::tag, character::complete::newline, multi::separated_list1, IResult};
+use winnow::{
+    ascii::{newline, space0, space1},
+    combinator::{opt, preceded, terminated},
+    token::tag,
+    PResult, Parser,
+};
 
-use crate::utils::parse_aligned_u32;
+use crate::utils::{parse_aligned_u32, parse_u32};
 
 type ID = usize;
 
@@ -37,36 +42,41 @@ pub fn solve2(input: Vec<Card>) -> u32 {
 }
 
 impl Card {
-    pub fn parse(input: &str) -> IResult<&str, Card> {
-        let (input, _) = tag("Card ")(input)?;
-        let (input, id) = parse_aligned_u32(input)?;
-        let (input, _) = tag(": ")(input)?;
-        let (input, left) = separated_list1(tag(" "), parse_aligned_u32)(input)?;
-        let (input, _) = tag(" | ")(input)?;
-        let (input, right) = separated_list1(tag(" "), parse_aligned_u32)(input)?;
+    pub fn parse<'s>(input: &mut &'s str) -> PResult<Card> {
+        let _ = tag("Card ").parse_next(input)?;
+        let id = parse_aligned_u32(input)?;
+        let _ = tag(":").parse_next(input)?;
 
-        Ok((
-            input,
-            Card(
-                id as usize,
-                left.into_iter().collect(),
-                right.into_iter().collect(),
-            ),
-        ))
+        let mut left = BTreeSet::new();
+        while let Some(number) = opt(preceded(space1, parse_u32)).parse_next(input)? {
+            left.insert(number);
+        }
+
+        let _ = preceded(space0, '|').parse_next(input)?;
+
+        let mut right = BTreeSet::new();
+        while let Some(number) = opt(preceded(space1, parse_u32)).parse_next(input)? {
+            right.insert(number);
+        }
+
+        Ok(Card(id as usize, left, right))
     }
 }
 
-pub fn parse_input(input: &str) -> IResult<&str, Vec<Card>> {
-    let (input, games) = separated_list1(newline, Card::parse)(input)?;
-    let (input, _) = newline(input)?;
+pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Vec<Card>> {
+    let mut games: Vec<Card> = Vec::with_capacity(211);
+    while let Some(round) = opt(terminated(Card::parse, newline)).parse_next(input)? {
+        games.push(round)
+    }
 
     if input.len() > 0 {
         panic!("Could not fully parse input file");
     }
 
-    Ok((input, games))
+    Ok(games)
 }
 
+#[allow(const_item_mutation)]
 #[cfg(test)]
 mod tests {
     use crate::day04::{parse_input, solve1, solve2};
@@ -81,11 +91,11 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
     #[test]
     fn part1() {
-        assert_eq!(solve1(parse_input(EXAMPLE_INPUT).unwrap().1), 13)
+        assert_eq!(solve1(parse_input(&mut EXAMPLE_INPUT).unwrap()), 13)
     }
 
     #[test]
     fn part2() {
-        assert_eq!(solve2(parse_input(EXAMPLE_INPUT).unwrap().1), 30)
+        assert_eq!(solve2(parse_input(&mut EXAMPLE_INPUT).unwrap()), 30)
     }
 }

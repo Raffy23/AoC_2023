@@ -40,21 +40,22 @@ fn run_day(day: u8, part: u8) {
     .expect("unable to read input file");
 
     print!("Day {:0>2} Part {}: ", day, part);
+    
     match (day, part) {
         (1, 1) => println!("{}", day01::solve1(day01::parse_input(&input))),
         (1, 2) => println!("{}", day01::solve1(day01::parse_input(&input))),
-        (2, 1) => println!("{}", day02::solve1(day02::parse_input(&input).unwrap().1)),
-        (2, 2) => println!("{}", day02::solve2(day02::parse_input(&input).unwrap().1)),
+        (2, 1) => println!("{}", day02::solve1(day02::parse_input(&mut input.as_str()).unwrap())),
+        (2, 2) => println!("{}", day02::solve2(day02::parse_input(&mut input.as_str()).unwrap())),
         (3, 1) => println!("{}", day03::solve1(day03::parse_input(&input))),
         (3, 2) => println!("{}", day03::solve2(day03::parse_input(&input))),
-        (4, 1) => println!("{}", day04::solve1(day04::parse_input(&input).unwrap().1)),
-        (4, 2) => println!("{}", day04::solve2(day04::parse_input(&input).unwrap().1)),
-        (5, 1) => println!("{}", day05::solve1(day05::parse_input(&input).unwrap().1)),
-        (5, 2) => println!("{}", day05::solve2(day05::parse_input(&input).unwrap().1)),
-        (6, 1) => println!("{}", day06::solve1(day06::parse_input(&input).unwrap().1)),
-        (6, 2) => println!("{}", day06::solve2(day06::parse_input(&input).unwrap().1)),
-        (7, 1) => println!("{}", day07::solve1(day07::parse_input(&input).unwrap().1)),
-        (7, 2) => println!("{}", day07::solve2(day07::parse_input(&input).unwrap().1)),
+        (4, 1) => println!("{}", day04::solve1(day04::parse_input(&mut input.as_str()).unwrap())),
+        (4, 2) => println!("{}", day04::solve2(day04::parse_input(&mut input.as_str()).unwrap())),
+        (5, 1) => println!("{}", day05::solve1(day05::parse_input(&mut input.as_str()).unwrap())),
+        (5, 2) => println!("{}", day05::solve2(day05::parse_input(&mut input.as_str()).unwrap())),
+        (6, 1) => println!("{}", day06::solve1(day06::parse_input(&mut input.as_str()).unwrap())),
+        (6, 2) => println!("{}", day06::solve2(day06::parse_input(&mut input.as_str()).unwrap())),
+        (7, 1) => println!("{}", day07::solve1(day07::parse_input(&mut input.as_str()).unwrap())),
+        (7, 2) => println!("{}", day07::solve2(day07::parse_input(&mut input.as_str()).unwrap())),
         _ => todo!(),
     }
 }

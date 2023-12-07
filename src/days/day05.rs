@@ -1,19 +1,17 @@
 use std::ops::Range;
 
 use itertools::Itertools;
-use nom::{
-    bytes::complete::tag,
-    character::complete::newline,
-    combinator::opt,
-    multi::separated_list1,
-    sequence::{preceded, terminated},
-    IResult,
-};
 use rangemap::RangeMap;
+use winnow::{
+    ascii::newline,
+    combinator::{opt, preceded, separated, terminated},
+    token::tag,
+    PResult, Parser,
+};
 
 use crate::utils::{parse_u32, parse_u64};
 
-type Input = (Vec<u64>, Vec<RangeMap<u64, (u64, u64)>>);
+type Input = (Vec<u64>, [RangeMap<u64, (u64, u64)>; 7]);
 
 pub fn solve1((seeds, range_maps): Input) -> u64 {
     seeds
@@ -75,60 +73,53 @@ fn intersection(range_map: &RangeMap<u64, (u64, u64)>, src_range: Range<u64>) ->
     result
 }
 
-fn parse_triple_u32<'a>(input: &'a str) -> IResult<&'a str, (u64, u64, u64)> {
-    let (input, fst) = parse_u32(input)?;
-    let (input, snd) = preceded(tag(" "), parse_u32)(input)?;
-    let (input, thd) = preceded(tag(" "), parse_u32)(input)?;
+fn parse_triple_u32<'s>(input: &mut &'s str) -> PResult<(u64, u64, u64)> {
+    let fst = parse_u32(input)?;
+    let snd = preceded(' ', parse_u32).parse_next(input)?;
+    let thd = preceded(' ', parse_u32).parse_next(input)?;
 
-    Ok((input, (fst as u64, snd as u64, thd as u64)))
+    Ok((fst as u64, snd as u64, thd as u64))
 }
 
-fn parse_map<'a>(
-    name: &'static str,
-    input: &'a str,
-) -> IResult<&'a str, RangeMap<u64, (u64, u64)>> {
-    let (input, _) = tag(name)(input)?;
-    let (input, _) = newline(input)?;
-    let (input, map) = terminated(separated_list1(newline, parse_triple_u32), newline)(input)?;
-    let (input, _) = opt(newline)(input)?;
+fn parse_map<'s>(name: &'static str, input: &mut &'s str) -> PResult<RangeMap<u64, (u64, u64)>> {
+    let _ = tag(name).parse_next(input)?;
+    let _ = newline(input)?;
 
     let mut range_map = RangeMap::new();
-    for (dst_start, src_start, src_len) in map {
+    while let Some((dst_start, src_start, src_len)) =
+        opt(terminated(parse_triple_u32, newline)).parse_next(input)?
+    {
         range_map.insert(src_start..(src_start + src_len), (dst_start, src_start));
     }
 
-    Ok((input, range_map))
+    let _ = opt(newline).parse_next(input)?;
+
+    Ok(range_map)
 }
 
-pub fn parse_input(input: &str) -> IResult<&str, Input> {
-    let (input, _) = tag("seeds: ")(input)?;
-    let (input, seeds) = terminated(separated_list1(tag(" "), parse_u64), newline)(input)?;
-    let (input, _) = newline(input)?;
+pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Input> {
+    let _ = tag("seeds: ").parse_next(input)?;
+    let seeds: Vec<u64> = terminated(separated(0.., parse_u64, ' '), newline).parse_next(input)?;
+    let _ = newline(input)?;
 
-    let (input, soil_map) = parse_map("seed-to-soil map:", input)?;
-    let (input, fertilizer_map) = parse_map("soil-to-fertilizer map:", input)?;
-    let (input, water_map) = parse_map("fertilizer-to-water map:", input)?;
-    let (input, light_map) = parse_map("water-to-light map:", input)?;
-    let (input, temperature_map) = parse_map("light-to-temperature map:", input)?;
-    let (input, humidity_map) = parse_map("temperature-to-humidity map:", input)?;
-    let (input, location_map) = parse_map("humidity-to-location map:", input)?;
+    let maps = [
+        parse_map("seed-to-soil map:", input)?,
+        parse_map("soil-to-fertilizer map:", input)?,
+        parse_map("fertilizer-to-water map:", input)?,
+        parse_map("water-to-light map:", input)?,
+        parse_map("light-to-temperature map:", input)?,
+        parse_map("temperature-to-humidity map:", input)?,
+        parse_map("humidity-to-location map:", input)?
+    ];
 
     if input.len() > 0 {
         panic!("Could not fully parse input file");
     }
 
-    let mut maps = Vec::with_capacity(7);
-    maps.push(soil_map);
-    maps.push(fertilizer_map);
-    maps.push(water_map);
-    maps.push(light_map);
-    maps.push(temperature_map);
-    maps.push(humidity_map);
-    maps.push(location_map);
-
-    Ok((input, (seeds, maps)))
+    Ok((seeds, maps))
 }
 
+#[allow(const_item_mutation)]
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -173,23 +164,23 @@ humidity-to-location map:
 
     #[test]
     fn part1() {
-        assert_eq!(solve1(parse_input(EXAMPLE_INPUT).unwrap().1), 35)
+        assert_eq!(solve1(parse_input(&mut EXAMPLE_INPUT).unwrap()), 35)
     }
 
     #[test]
     fn solve_part1() {
         let input = read_input(5, Part::Part1).expect("unable to read input file");
-        println!("{}", solve1(parse_input(&input).unwrap().1))
+        println!("{}", solve1(parse_input(&mut input.as_str()).unwrap()))
     }
 
     #[test]
     fn part2() {
-        assert_eq!(solve2(parse_input(EXAMPLE_INPUT).unwrap().1), 46)
+        assert_eq!(solve2(parse_input(&mut EXAMPLE_INPUT).unwrap()), 46)
     }
 
     #[test]
     fn solve_part2() {
         let input = read_input(5, Part::Part1).expect("unable to read input file");
-        println!("{}", solve2(parse_input(&input).unwrap().1))
+        println!("{}", solve2(parse_input(&mut input.as_str()).unwrap()))
     }
 }
