@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::HashMap;
 
 use itertools::Itertools;
 use num::integer::lcm;
@@ -9,49 +9,45 @@ use winnow::{
     PResult, Parser,
 };
 
-type Input<'s> = (&'s str, HashMap<&'s str, u32>, Vec<(u32, u32)>);
+type Node = u16;
 
-pub fn solve1<'s>((directions, nodes, edges): Input<'s>) -> u64 {
-    let start_node = *nodes.get("AAA").unwrap();
-    let target_node = *nodes.get("ZZZ").unwrap();
+type Input<'s> = (&'s str, HashMap<&'s str, Node>, Vec<(Node, Node, bool)>);
 
-    find_steps_between_node(
-        &(directions, nodes, edges),
-        start_node,
-        &BTreeSet::from([target_node]),
-    )
+pub fn solve1<'s>((directions, node_lookup, mut nodes): Input<'s>) -> u64 {
+    let start_node = *node_lookup.get("AAA").unwrap();
+    let target_node = *node_lookup.get("ZZZ").unwrap();
+
+    nodes[target_node as usize].2 = true;
+
+    find_steps_to_end_node(&(directions, node_lookup, nodes), start_node)
 }
 
-pub fn solve2<'s>((directions, nodes, edges): Input<'s>) -> u64 {
-    let start_nodes = nodes
+pub fn solve2<'s>((directions, node_lookup, mut nodes): Input<'s>) -> u64 {
+    let start_nodes = node_lookup
         .iter()
         .filter(|(name, _)| name.ends_with("A"))
         .map(|(_, value)| *value)
         .collect_vec();
 
-    let target_nodes: BTreeSet<u32> = nodes
-        .iter()
-        .filter(|(name, _)| name.ends_with("Z"))
-        .map(|(_, value)| *value)
-        .collect();
+    for (&name, &id) in node_lookup.iter() {
+        if name.ends_with("Z") {
+            nodes[id as usize].2 = true;
+        }
+    }
 
-    let input = (directions, nodes, edges);
+    let input = (directions, node_lookup, nodes);
     start_nodes
         .into_iter()
-        .map(|start_node| find_steps_between_node(&input, start_node, &target_nodes))
+        .map(|start_node| find_steps_to_end_node(&input, start_node))
         .fold(1, lcm)
 }
 
-fn find_steps_between_node<'s>(
-    (directions, _, edges): &Input<'s>,
-    start_node: u32,
-    end_nodes: &BTreeSet<u32>,
-) -> u64 {
+fn find_steps_to_end_node<'s>((directions, _, edges): &Input<'s>, start_node: Node) -> u64 {
     let mut current_node = start_node;
     let mut position = 0_u64;
     let mut directions = directions.as_bytes().into_iter().cycle();
 
-    while !end_nodes.contains(&current_node) {
+    while !edges[current_node as usize].2 {
         position += 1;
 
         let next_node = if *directions.next().unwrap() == b'L' {
@@ -74,7 +70,7 @@ pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Input<'s>> {
     let mut nodes = HashMap::new();
     let mut edges = Vec::with_capacity(772);
 
-    let mut index = 0_u32;
+    let mut index = 0_u16;
     while let Some((name, left, right)) = opt(terminated(parse_row, newline)).parse_next(input)? {
         nodes.insert(name, index);
         edges.push((left, right));
@@ -83,7 +79,7 @@ pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Input<'s>> {
 
     let nodes_data = edges
         .into_iter()
-        .map(|(left, right)| (*nodes.get(left).unwrap(), *nodes.get(right).unwrap()))
+        .map(|(left, right)| (*nodes.get(left).unwrap(), *nodes.get(right).unwrap(), false))
         .collect_vec();
 
     Ok((directions, nodes, nodes_data))
