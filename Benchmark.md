@@ -7,17 +7,17 @@ The Benchmark was with `cargo bench` on an AMD Ryzen 5800X @ 4,4Ghz.
 
 | Benchmark         | Mean         |     |   std dev  |
 |:------------------|:------------:|-----|-----------:|
-| Day01 Part 1      | 31.117 µs	   | ±   | 254.99 ns  |
-| Day01 Part 2      | 32.246 µs	   | ±   | 226.50 ns  |
-| Day02 Part 1      | 33.283 µs	   | ±   | 197.16 ns  |
-| Day02 Part 2      | 33.476 µs	   | ±   | 898.37 ns  |
-| Day03 Part 1      | 171.71 µs	   | ±   | 5.6497 µs  |
-| Day03 Part 2      | 98.155 µs	   | ±   | 410.78 ns  |
-| Day04 Part 1      | 328.56 µs	   | ±   | 7.1073 µs  |
-| Day04 Part 2      | 330.34 µs	   | ±   | 6.2315 µs  |
-| Day05 Part 1      | 17.055 µs	   | ±   | 505.73 ns  |
-| Day05 Part 2      | 46.164 µs	   | ±   | 1.1514 µs  |
-| Day06 Part 1      | 280.72 ns	   | ±   | 7.2635 ns  |
-| Day06 Part 2      | 759.61 ns	   | ±   | 6.4271 ns  |
-| Day07 Part 1      | 286.22 µs	   | ±   | 1.1044 µs  |
-| Day07 Part 2      | 305.23 µs	   | ±   | 9.8325 µs  |
+| Day01 Part 1      | 28.556 µs	   | ±   | 1.0670 µs  |
+| Day01 Part 2      | 33.966 µs	   | ±   | 719.05 ns  |
+| Day02 Part 1      | 20.898 µs	   | ±   | 466.67 ns  |
+| Day02 Part 2      | 21.608 µs	   | ±   | 104.52 ns  |
+| Day03 Part 1      | 159.79 µs	   | ±   | 1.6047 µs  |
+| Day03 Part 2      | 91.840 µs	   | ±   | 2.3009 µs  |
+| Day04 Part 1      | 293.20 µs	   | ±   | 14.692 µs  |
+| Day04 Part 2      | 294.98 µs	   | ±   | 838.68 ns  |
+| Day05 Part 1      | 13.731 µs	   | ±   | 84.740 ns  |
+| Day05 Part 2      | 40.840 µs	   | ±   | 145.46 ns  |
+| Day06 Part 1      | 292.76 ns	   | ±   | 974.84 ps  |
+| Day06 Part 2      | 730.92 ns	   | ±   | 29.987 ns  |
+| Day07 Part 1      | 248.47 µs	   | ±   | 9.6517 µs  |
+| Day07 Part 2      | 255.91 µs	   | ±   | 1.4921 µs  |
