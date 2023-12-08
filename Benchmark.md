@@ -21,3 +21,5 @@ The Benchmark was with `cargo bench` on an AMD Ryzen 5800X @ 4,4Ghz.
 | Day06 Part 2      | 730.92 ns	   | ±   | 29.987 ns  |
 | Day07 Part 1      | 248.47 µs	   | ±   | 9.6517 µs  |
 | Day07 Part 2      | 255.91 µs	   | ±   | 1.4921 µs  |
+| Day08 Part 1      | 87.959 µs	   | ±   | 4.8423 µs  |
+| Day08 Part 2      | 669.87 µs	   | ±   | 20.092 µs  |

@@ -1,6 +1,6 @@
 use aoc_2023::{
     day02,
-    utils::{read_input, Part}, day01, day03, day04, day05, day06, day07,
+    utils::{read_input, Part}, day01, day03, day04, day05, day06, day07, day08,
 };
 use clap::Parser;
 
@@ -56,6 +56,8 @@ fn run_day(day: u8, part: u8) {
         (6, 2) => println!("{}", day06::solve2(day06::parse_input(&mut input.as_str()).unwrap())),
         (7, 1) => println!("{}", day07::solve1(day07::parse_input(&mut input.as_str()).unwrap())),
         (7, 2) => println!("{}", day07::solve2(day07::parse_input(&mut input.as_str()).unwrap())),
+        (8, 1) => println!("{}", day08::solve1(day08::parse_input(&mut input.as_str()).unwrap())),
+        (8, 2) => println!("{}", day08::solve2(day08::parse_input(&mut input.as_str()).unwrap())),
         _ => todo!(),
     }
 }
