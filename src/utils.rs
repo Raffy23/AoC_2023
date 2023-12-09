@@ -1,7 +1,7 @@
 use std::{fs::read_to_string, io};
 
 use winnow::{
-    ascii::{digit1, multispace0},
+    ascii::{digit1, multispace0, dec_int},
     combinator::preceded,
     PResult, Parser,
 };
@@ -45,4 +45,8 @@ pub fn parse_aligned_u32<'s>(input: &mut &'s str) -> PResult<u32> {
     preceded(multispace0, digit1)
         .parse_next(input)
         .map(|digits| str::parse(digits).unwrap())
+}
+
+pub fn parse_i32<'s>(input: &mut &'s str) -> PResult<i32> {
+    dec_int(input)
 }
