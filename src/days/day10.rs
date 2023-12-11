@@ -22,30 +22,26 @@ pub fn solve1(input: Input) -> usize {
     distance / 2
 }
 
-pub fn solve2(input: Input) -> usize {
-    let rows = input.len();
-    let cols = input[0].len();
-
-    let mut polygon_raster: Vec<Vec<Option<u16>>> = Vec::with_capacity(rows);
-    for _ in 0..rows {
-        let mut vec = Vec::with_capacity(cols);
-        for _ in 0..cols {
-            vec.push(None);
-        }
-
-        polygon_raster.push(vec);
-    }
-
+pub fn solve2(input: Input) -> u32 {
     let start = find_start(&input);
     let (mut current_point, _) = find_next_segments(&input, start);
     let mut previous_point = start;
-    let mut distance: u16 = 1;
-    
-    polygon_raster[start.0 as usize][start.1 as usize] = Some(0);
+    let mut distance: u32 = 1;
+
+    let mut polygon_vertices = Vec::with_capacity(64);
+    polygon_vertices.push(start);
 
     while current_point != start {
-        polygon_raster[current_point.0 as usize][current_point.1 as usize] = Some(distance);
+        let current_symbol = input[current_point.0 as usize][current_point.1 as usize];
         distance += 1;
+
+        if current_symbol == b'F'
+            || current_symbol == b'L'
+            || current_symbol == b'J'
+            || current_symbol == b'7'
+        {
+            polygon_vertices.push(current_point);
+        }
 
         let (p1, p2) = connecting_segments(&input, current_point).unwrap();
 
@@ -53,35 +49,20 @@ pub fn solve2(input: Input) -> usize {
             (if p1 == previous_point { p2 } else { p1 }, current_point);
     }
 
-    let polygon_length = distance;
-
-    let mut winding_count = 0;
-    let mut inside_segments = 0;
-
-    // non-zero winding rule
-    // https://en.wikipedia.org/wiki/Nonzero-rule
-    for row_index in 0..rows {
-        for col_index in 0..cols {
-            if let Some(distance) = polygon_raster[row_index][col_index] {
-                if row_index + 1 < rows {
-                    if let Some(distance_below) = polygon_raster[row_index + 1][col_index] {
-                        if distance_below == (distance + 1) % polygon_length {
-                            winding_count += 1
-                        }
-                        if distance == (distance_below + 1) % polygon_length {
-                            winding_count -= 1
-                        }
-                    }
-                }
-            } else {
-                if winding_count != 0 {
-                    inside_segments += 1
-                }
-            }
-        }
+    // Shoelace algorithm:
+    let mut sum_1 = 0_u32;
+    let mut sum_2 = 0_u32;
+    for i in 0..polygon_vertices.len() - 1 {
+        sum_1 += polygon_vertices[i].0 as u32 * polygon_vertices[i + 1].1 as u32;
+        sum_2 += polygon_vertices[i].1 as u32 * polygon_vertices[i + 1].0 as u32;
     }
 
-    inside_segments
+    sum_1 += polygon_vertices[polygon_vertices.len() - 1].0 as u32 * polygon_vertices[0].1 as u32;
+    sum_2 += polygon_vertices[0].0 as u32 * polygon_vertices[polygon_vertices.len() - 1].1 as u32;
+
+    let area = sum_1.abs_diff(sum_2) / 2;
+
+    area - distance / 2 + 1
 }
 
 fn find_next_segments(input: &Input, start_point: Point) -> (Point, Point) {
