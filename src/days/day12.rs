@@ -25,20 +25,20 @@ pub fn solve1(input: Input) -> u64 {
 }
 
 pub fn solve2(input: Input) -> u64 {
-    let receptions = 5_usize;
+    let repetitions = 5_usize;
     let mut cache = Cache::new();
 
     input
         .into_iter()
         .map(|(spring_conditions, windows)| {
             let mut s: Vec<u8> =
-                Vec::with_capacity(spring_conditions.len() * receptions + spring_conditions.len());
-            let mut w: Vec<u8> = Vec::with_capacity(windows.len() * receptions);
-            for i in 0..receptions {
+                Vec::with_capacity(spring_conditions.len() * repetitions + spring_conditions.len());
+            let mut w: Vec<u8> = Vec::with_capacity(windows.len() * repetitions);
+            for i in 0..repetitions {
                 w.extend_from_slice(&windows);
                 s.extend_from_slice(spring_conditions);
 
-                if i < (receptions - 1) {
+                if i < (repetitions - 1) {
                     s.push(b'?');
                 }
             }
