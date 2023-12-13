@@ -1,5 +1,9 @@
+use std::{cell::RefCell, sync::Arc};
+
 use hashbrown::HashMap;
 use itertools::Itertools;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use thread_local::ThreadLocal;
 use winnow::{
     ascii::newline,
     combinator::{opt, terminated},
@@ -26,11 +30,14 @@ pub fn solve1(input: Input) -> u64 {
 
 pub fn solve2(input: Input) -> u64 {
     let repetitions = 5_usize;
-    let mut cache = Cache::new();
+    let tls_cache: Arc<ThreadLocal<RefCell<Cache>>> = Arc::new(ThreadLocal::new());
 
     input
-        .into_iter()
+        .into_par_iter()
         .map(|(spring_conditions, windows)| {
+            let cache = tls_cache.get_or_default();
+            let mut cache = cache.borrow_mut();
+
             let mut s: Vec<u8> =
                 Vec::with_capacity(spring_conditions.len() * repetitions + spring_conditions.len());
             let mut w: Vec<u8> = Vec::with_capacity(windows.len() * repetitions);
