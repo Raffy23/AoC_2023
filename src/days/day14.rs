@@ -1,5 +1,6 @@
-use hashbrown::{HashSet, HashMap};
-use itertools::Itertools;
+use hashbrown::HashMap;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use winnow::{
     ascii::newline,
     combinator::{opt, terminated},
@@ -7,8 +8,6 @@ use winnow::{
     token::take_till,
     PResult, Parser,
 };
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 
 type Matrix = Vec<Vec<u8>>;
 
@@ -40,30 +39,31 @@ pub fn solve1(mut input: Matrix) -> usize {
 }
 
 pub fn solve2(mut input: Matrix) -> usize {
+    const TARGET_CYCLE: usize = 1_000_000_000;
+
     let rows = input.len();
-    let mut seen = HashMap::with_capacity(64);
 
-
+    let mut seen = HashMap::with_capacity(164);
     let mut cycle = 1;
     let mut cycle_length = 0;
 
-    while cycle < 1000000000 {
+    while cycle < TARGET_CYCLE {
         move_rocks(&mut input, Direction::North);
         move_rocks(&mut input, Direction::West);
         move_rocks(&mut input, Direction::South);
         move_rocks(&mut input, Direction::East);
 
-        let hash = calculate_hash(&input);
-        if seen.contains_key(&hash) {
-            cycle_length = cycle - *seen.get(&hash).unwrap();
-            break; 
+        let hash = calculate_hash(&mut input);
+        if let Some(&length) = seen.get(&hash) {
+            cycle_length = cycle - length;
+            break;
         }
 
         seen.insert(hash, cycle);
         cycle += 1;
     }
 
-    let remaining = (1000000000 - cycle) % cycle_length;
+    let remaining = (TARGET_CYCLE - cycle) % cycle_length;
     for _ in 0..remaining {
         move_rocks(&mut input, Direction::North);
         move_rocks(&mut input, Direction::West);
@@ -103,8 +103,7 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
                         CUBE_ROCK => {
                             top_index = row_index + 1;
                         }
-                        EMPTY_SPACE => { /* nothing */ }
-                        _ => unreachable!(),
+                        _ => { /* nothing */ }
                     }
                 }
             }
@@ -116,11 +115,8 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
 
                 for row_index in (0..rows).rev() {
                     match input[row_index][col_index] {
-                        ROUND_ROCK if top_index == row_index && top_index == 0 => {
-                            /* nothing */
-                        }
                         ROUND_ROCK if top_index == row_index => {
-                            top_index -= 1;
+                            top_index = top_index.checked_sub(1).unwrap_or(0);
                         }
                         ROUND_ROCK => {
                             input[top_index][col_index] = ROUND_ROCK;
@@ -130,9 +126,7 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
                         CUBE_ROCK if row_index > 0 => {
                             top_index = row_index - 1;
                         }
-                        CUBE_ROCK if row_index == 0 => { /* nothing */ }
-                        EMPTY_SPACE => { /* nothing */ }
-                        _ => unreachable!(),
+                        _ => { /* nothing */ }
                     }
                 }
             }
@@ -155,8 +149,7 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
                         CUBE_ROCK => {
                             top_index = col_index + 1;
                         }
-                        EMPTY_SPACE => { /* nothing */ }
-                        _ => unreachable!(),
+                        _ => { /* nothing */ }
                     }
                 }
             }
@@ -168,11 +161,8 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
 
                 for col_index in (0..cols).rev() {
                     match input[row_index][col_index] {
-                        ROUND_ROCK if top_index == col_index && top_index == 0 => {
-                            /* nothing */
-                        }
                         ROUND_ROCK if top_index == col_index => {
-                            top_index -= 1;
+                            top_index = top_index.checked_sub(1).unwrap_or(0);
                         }
                         ROUND_ROCK => {
                             input[row_index][top_index] = ROUND_ROCK;
@@ -182,9 +172,7 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
                         CUBE_ROCK if col_index > 0 => {
                             top_index = col_index - 1;
                         }
-                        CUBE_ROCK if col_index == 0 => { /* nothing */ }
-                        EMPTY_SPACE => { /* nothing */ }
-                        _ => unreachable!(),
+                        _ => { /* nothing */ }
                     }
                 }
             }
@@ -192,6 +180,7 @@ fn move_rocks(input: &mut Matrix, direction: Direction) {
     }
 }
 
+#[inline]
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
     let mut s = DefaultHasher::new();
     t.hash(&mut s);
@@ -199,7 +188,7 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 }
 
 pub fn parse_input<'s>(input: &mut &'s str) -> PResult<Matrix> {
-    let mut values: Vec<Vec<u8>> = Vec::with_capacity(32);
+    let mut values: Vec<Vec<u8>> = Vec::with_capacity(100);
 
     while let Some(value) = opt(terminated(
         take_till(1.., |c: char| c.is_newline()),
